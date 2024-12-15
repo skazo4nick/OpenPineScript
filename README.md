@@ -2,7 +2,7 @@
 
 **OpenPineScript** is an open-source runtime for executing Pine Script code. The goal is to provide an alternative platform for Pine Script developers to run and experiment with their code in open environments, free from proprietary constraints. 
 
-Built with [ANTLR](https://www.antlr.org/) for parsing, OpenPineScript replicates the core functionality of Pine Script, making it accessible and extensible for developers across various platforms.
+OpenPineScript replicates the core functionality of Pine Script, making it accessible and extensible for developers across various platforms.
 
 ---
 
@@ -19,7 +19,6 @@ Built with [ANTLR](https://www.antlr.org/) for parsing, OpenPineScript replicate
 
 ### Prerequisites
 - [Node.js 16+](https://nodejs.org/)
-- (Optional) [Java](https://www.java.com/): Required only for rebuilding the parser.
 
 ### Installation
 ```bash
