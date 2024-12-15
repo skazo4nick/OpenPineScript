@@ -28,5 +28,4 @@ git clone https://github.com/yourusername/OpenPineScript.git
 # Navigate to the project directory
 cd OpenPineScript
 
-# Install dependencies
-npm install
+
