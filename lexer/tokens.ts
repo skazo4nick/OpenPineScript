@@ -58,4 +58,3 @@ export interface Token {
         absoluteIndex: number;
     }
 }
-

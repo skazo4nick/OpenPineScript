@@ -2,6 +2,7 @@ import {Token, TokenType} from "./tokens";
 import { SearchTreeNode } from "./searchtree";
 import { literalsSearchTree } from "./literals";
 import {keywordsSearchTree} from "./keywords";
+import { Directives } from "./directives";
 
 
 function matchLongest(sourceCode: string, start: number, tree: SearchTreeNode<Token>): Token|null {
@@ -26,15 +27,14 @@ function matchLongest(sourceCode: string, start: number, tree: SearchTreeNode<To
     return longestMatch; // Return the longest matching token, or null if no match
 }
 
+const ALPHABETS_REGEX = /[a-zA-Z]+/y;
 const ID_REGEX = /([a-zA-Z_])(\.?([a-zA-Z_0-9]+\.)*[a-zA-Z_0-9]+)?/y;
-
 /*
 This is not being used in the parser, also this will cause clash
 with COLOR_LITERAL as that also starts with a hashtag
 
 const ID_EX_REGEX = /([a-zA-Z_#])(\.?([a-zA-Z_#0-9]+\.)*[a-zA-Z_#0-9]+)?/y;
 */
-
 const COLOR_LITERAL1_REGEX = /#[0-9a-fA-F]{6}/y;
 const COLOR_LITERAL2_REGEX = /#[0-9a-fA-F]{8}/y;
 const FLOAT_LITERAL_REGEX = /(?:\.\d+(?:[eE][+-]?\d+)?|\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/y;
@@ -95,8 +95,28 @@ function handleLineEnd(tokens: Token[], lineEndToken: Token) {
     return tokens;
 }
 
-export function tokenize(sourceCode: string, skip_second_pass:boolean = false): {tokens: Token[]} {
+function skipTillLineEnd(sourceCode: string, start: number) {
+    for(let j=start; j<sourceCode.length; j++) {
+        const _char = sourceCode[j];
+        if(_char === '\n' || _char === '\r') {
+            return j;
+        }
+    }
+    return sourceCode.length;
+}
+
+function skipWhiteSpace(sourceCode: string, start: number) {
+    for(let j=start; j<sourceCode.length; j++) {
+        const _char = sourceCode[j];
+        if(_char !== ' ' && _char !== '\t')
+            return j;
+    }
+    return sourceCode.length;
+}
+
+export function tokenize(sourceCode: string, skip_second_pass:boolean = false): {tokens: Token[], directives: Directives} {
     let tokens = new Array<Token>();
+    const directives: Directives = {};
     let lineNo = 1;
     let lastLineEndIndex = 0;
 
@@ -109,24 +129,56 @@ export function tokenize(sourceCode: string, skip_second_pass:boolean = false): 
             tokens.push({value: null, type: TokenType.LBEG, metadata})
 
         // Handle Indentation-case
-        if(char === '\t') {
-            tokens.push({ value: ' ', type: TokenType.INDENT, metadata });
-            continue;
-        } else if(char === ' ' && sourceCode.length >= i+4 && sourceCode[i+1] === ' ' && sourceCode[i+2] === ' ' && sourceCode[i+3] === ' ') {
-            tokens.push({ value: '    ', type: TokenType.INDENT, metadata });
-            i += 3;
-            continue;
-        }
-
-        // Skip comments
-        if(char === '/' && sourceCode.length >= i+1 && sourceCode[i+1] === '/') {
-            for(let j=i+2; j<sourceCode.length; j++) {
-                const _char = sourceCode[j];
-                if(_char === '\n' || _char === '\r') {
-                    i = j-1;
-                    break;
+        if(tokens.length > 0 && tokens[tokens.length-1].type === TokenType.LBEG) {
+            if(char === '\t') {
+                tokens.push({ value: ' ', type: TokenType.INDENT, metadata });
+                continue;
+            } else if(char === ' ') {
+                let spacesCount = 1;
+                for(let j=i+1; j<sourceCode.length; j++) {
+                    if(sourceCode[j] === ' ') {
+                        spacesCount++;
+                    } else {
+                        break;
+                    }
+                }
+                if(spacesCount % 4 === 0) {
+                    const indentsCount = spacesCount / 4;
+                    for(let j=0; j<indentsCount; j++)
+                        tokens.push({ value: '    ', type: TokenType.INDENT, metadata });
+                    i += spacesCount - 1;
+                    continue;
+                } else {
+                    // if(tokens.length > 0 && tokens[tokens.length-1].type === TokenType.LBEG)
+                    //     tokens.pop();
+                    i += spacesCount - 1;
+                    tokens.push({ value: null, type: TokenType.LINE_CONTINUATION, metadata })
+                    continue;
                 }
             }
+        }
+
+        // Skip comments & handle compiler declarations
+        if(char === '/' && sourceCode.length >= i+1 && sourceCode[i+1] === '/') {
+            if(sourceCode.length >= i+3 && sourceCode[i+2] === '@') {
+                // it's an @ directive, eg: //@version=3, //@type
+                const directive_name = regexTest(ALPHABETS_REGEX, sourceCode, i+3);
+                if(directive_name === 'version') {
+                    const _i = skipWhiteSpace(sourceCode, i+3+7);
+                    const _check = sourceCode?.[_i];
+                    if(_check === '=') {
+                        const __i = skipWhiteSpace(sourceCode, _i+1);
+                        const int_match = regexTest(INT_LITERAL_REGEX, sourceCode, __i);
+                        if(int_match) {
+                            directives.version = parseInt(int_match);
+                        }
+                    }
+                }
+            } else if(sourceCode.length >= i+3 && sourceCode[i+2] === '#') {
+                // it's a # directive, eg: //#region, //#endregion
+                
+            }
+            i = skipTillLineEnd(sourceCode, i+3);
             continue;
         }
 
@@ -178,8 +230,12 @@ export function tokenize(sourceCode: string, skip_second_pass:boolean = false): 
         }
     }
 
+    if(!directives.version) {
+        directives.version = 1;
+    }
+
     if(!skip_second_pass) {
-        // Post-processing to handle BEGIN, END & PLEND tokens
+        // Post-processing to handle BEGIN, END, PLEND & LINE_CONTINUATION tokens
         const newTokens: Token[] = [];
         let lastLineIndentationLevel = 0;
         let lastLineLEND: Token|null = null;
@@ -216,14 +272,18 @@ export function tokenize(sourceCode: string, skip_second_pass:boolean = false): 
             } else if(token.type === TokenType.LEND) {
                 lastLineLEND = token;
                 newTokens.push(token);
+            } else if(token.type === TokenType.LINE_CONTINUATION) {
+                const tokensToRemove = [TokenType.LEND, TokenType.LBEG, TokenType.INDENT, TokenType.EMPTY_LINE] as TokenType[];
+                while(tokensToRemove.includes(newTokens[newTokens.length-1].type))
+                    newTokens.pop();
             } else {
                 newTokens.push(token);
             }
         }
-        return {tokens:newTokens};
+        return {tokens:newTokens, directives};
     }
 
-    return {tokens};
+    return {tokens, directives};
 }
 
 

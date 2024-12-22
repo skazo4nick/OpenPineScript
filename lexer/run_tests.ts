@@ -46,7 +46,7 @@ fs.readdir(testsFolder, (err, files) => {
                     }
 
                     const output = tokenize(sourceCode);
-                    console.log(`#############  ${path.basename(filePath)}  ################`)
+                    console.log(`#############  ${path.basename(filePath)}, Pinescript version = ${output.directives.version}  ################`)
                     console.log(output.tokens.map(visualizeToken).join("\n"))
                     console.log("\n\n\n")
                 });

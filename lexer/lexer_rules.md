@@ -109,13 +109,13 @@ What's implemented till now:
 - LBEG
 - LEND
 - EMPTY_LINE
-
-
-What's remaining:
 - BEGIN
 - END
 - PLEND
-- need to add support for directives!!!!
+
+
+What's remaining:
+- need to add support for directives, other than version!!!!
 
 
 No need to implement (Not being used in the parser grammar):

@@ -4,6 +4,14 @@
 
 OpenPineScript replicates the core functionality of Pine Script, making it accessible and extensible for developers across various platforms.
 
+## Development Updates
+- Stage 1: Lexer - The lexer is now fully functional & compliant. (Directives other than version will be added later)
+- Stage 2: Parser - ...
+- Stage 3: Compiler - ...
+- Stage 4: VM Implementation - ...
+- Stage 5: Runtime GUI Environment - ...
+
+
 ---
 
 ## Features
