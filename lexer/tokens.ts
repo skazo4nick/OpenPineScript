@@ -50,7 +50,12 @@ export enum TokenType {
 }
 
 export interface Token {
-    value: string,
+    value: string|null,
     type: TokenType;
+    metadata?: {
+        line: number;
+        column: number;
+        absoluteIndex: number;
+    }
 }
 

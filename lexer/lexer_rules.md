@@ -99,27 +99,27 @@ What's implemented till now:
 - BREAK
 - CONTINUE
 - ID
-- ID_EX
 - INDENT
 - WHITESPACE
-- 
+- COLOR_LITERAL
+- INT_LITERAL
+- FLOAT_LITERAL
+- BOOL_LITERAL
+- STR_LITERAL
+- LBEG
+- LEND
+- EMPTY_LINE
 
 
 What's remaining:
 - BEGIN
 - END
-- LBEG
-- LEND
 - PLEND
-- INT_LITERAL
-- FLOAT_LITERAL
-- STR_LITERAL
-- BOOL_LITERAL
-- COLOR_LITERAL
-- LINE_CONTINUATION
-- EMPTY_LINE
+- need to add support for directives!!!!
 
 
 No need to implement (Not being used in the parser grammar):
 - EMPTY_LINE_V1
+- ID_EX
+- LINE_CONTINUATION
 
