@@ -26,8 +26,10 @@ fs.readdir(testsFolder, (err, files) => {
         return;
     }
 
+    const pineFiles = files.filter(file => path.extname(file) === '.pine');
+
     // Iterate through each file
-    files.forEach(file => {
+    pineFiles.forEach(file => {
         const filePath = path.join(testsFolder, file);
 
         // Check if it's a file (not a directory)
@@ -45,9 +47,23 @@ fs.readdir(testsFolder, (err, files) => {
                         return;
                     }
 
+                    // Retain the base name and change the extension to .lex
+                    const newFilePath = path.join(
+                        path.dirname(filePath),
+                        path.basename(filePath, path.extname(filePath)) + '.json'
+                    );
+
                     const output = tokenize(sourceCode);
                     console.log(`#############  ${path.basename(filePath)}, Pinescript version = ${output.directives.version}  ################`)
                     console.log(output.tokens.map(visualizeToken).join("\n"))
+                    fs.writeFile(newFilePath, JSON.stringify(output), (err) => {
+                        if (err) {
+                            console.error('Error writing to file:', err);
+                        } else {
+                            console.log(`Data written to file: ${filePath}`);
+                        }
+                    });
+                    
                     console.log("\n\n\n")
                 });
             }
