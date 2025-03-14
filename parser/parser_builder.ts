@@ -298,7 +298,7 @@ export class OpenPinescriptParser extends CstParser {
         this.CONSUME(LBEG)
         this.CONSUME(IF_COND_ELSE)
         this.CONSUME(LEND)
-        this.CONSUME(this.stmts_block)
+        this.SUBRULE(this.stmts_block)
     })
 
     private if_then_else_expr = this.RULE("if_then_else_expr", () => {
