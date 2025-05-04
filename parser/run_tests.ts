@@ -43,7 +43,6 @@ fs.readdir(sourceDir, (err, files) => {
     });
 });
 
-
 // Path to the 'tests' folder
 const testsFolder = path.join(__dirname, 'tests');
 fs.readdir(testsFolder, (err, files) => {
@@ -95,6 +94,35 @@ fs.readdir(testsFolder, (err, files) => {
                     
                     // console.log("\n\n\n")
                 });
+            }
+        });
+    });
+});
+
+// Directory to check
+const dir = path.join(__dirname, 'tests');
+
+fs.readdir(dir, (err, files) => {
+    if (err) {
+        console.error('Error reading directory:', err);
+        return;
+    }
+    const jsonFiles = files.filter(file => file.endsWith('.json'));
+    jsonFiles.forEach(file => {
+        const filePath = path.join(dir, file);
+        fs.readFile(filePath, 'utf8', (err, data) => {
+            if (err) {
+                console.error('Error reading file:', filePath, err);
+                return;
+            }
+            if (!data.trim()) {
+                console.warn(`WARNING: File is empty: ${file}`);
+                return;
+            }
+            try {
+                JSON.parse(data);
+            } catch (e) {
+                console.warn(`WARNING: Invalid JSON in file: ${file}`);
             }
         });
     });

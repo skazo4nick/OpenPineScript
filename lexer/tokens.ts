@@ -46,7 +46,8 @@ export enum TokenType {
     LINE_CONTINUATION,
     EMPTY_LINE_V1,
     EMPTY_LINE,
-    WHITESPACE
+    WHITESPACE,
+    DOT // Add DOT token type
 }
 
 export interface Token {

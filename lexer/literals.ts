@@ -24,7 +24,8 @@ export const Literals: Token[] = [
     Literal("[", TokenType.LSQBR),
     Literal("]", TokenType.RSQBR),
     Literal("=", TokenType.DEFINE),
-    Literal(":=", TokenType.ASSIGN),  
+    Literal(":=", TokenType.ASSIGN),
+    Literal(".", TokenType.DOT), // Add dot literal
 ];
 
 export const literalsSearchTree = buildSearchTree(Literals);

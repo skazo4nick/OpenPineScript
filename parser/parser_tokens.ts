@@ -43,6 +43,7 @@ export const STR_LITERAL = createToken({name: "STR_LITERAL"})
 export const BOOL_LITERAL = createToken({name: "BOOL_LITERAL"})
 export const COLOR_LITERAL = createToken({name: "COLOR_LITERAL"})
 export const ID = createToken({name: "ID"})
+export const DOT = createToken({name: "DOT"})
 // const ID_EX = createToken({name: "ID_EX"})
 // const INDENT = createToken({name: "INDENT"})
 // const LINE_CONTINUATION = createToken({name: "LINE_CONTINUATION"})
@@ -91,7 +92,8 @@ export const allTokens = [
     BOOL_LITERAL,
     COLOR_LITERAL,
     ID,
-    EMPTY_LINE
+    EMPTY_LINE,
+    DOT
 ]
 
 const lexerToParserTokens = {
@@ -137,6 +139,7 @@ const lexerToParserTokens = {
     [TokenType.BOOL_LITERAL]: BOOL_LITERAL,
     [TokenType.COLOR_LITERAL]: COLOR_LITERAL,
     [TokenType.ID]: ID,
+    [TokenType.DOT]: DOT,
     // [TokenType.ID_EX]: ID_EX,
     // [TokenType.INDENT]: INDENT
     // [TokenType.LINE_CONTINUATION]: LINE_CONTINUATION
